@@ -1,3 +1,12 @@
+import op_base
+import op_font
+import op_graphics
+
+def populate(d, module):
+    for key, value in module.__dict__.items():
+        if key[:3] == 'op_':
+            d[key[3:]] = PSObject('operatortype', value, False)
+
 class PushBackIter:
     def __init__(self, iterable):
         self.iter = iter(iterable)
@@ -214,6 +223,10 @@ class Interpreter:
         self.dict_stack.push(self.globaldict)
         self.dict_stack.push(self.userdict)
 
+        populate(self.systemdict, op_base)
+        populate(self.systemdict, op_font)
+        populate(self.systemdict, op_graphics)
+
         self.op_stack = []
         self.ex_stack = []
 
@@ -225,9 +238,23 @@ class Interpreter:
             if not token:
                 self.ex_stack.pop()
                 continue
-            if token.literal:
-                self.op_stack.append(token)
-                print('ops:', self.op_stack)
+            self.execobj(token, True)
+
+    def execobj(self, token, direct):
+        if (token.literal
+            or token.type in ('integertype', 'realtype', 'stringtype')
+            or (token.type == 'arraytype' and direct)):
+            self.op_stack.append(token)
+            print('ops:', self.op_stack)
+
+        elif token.type == 'nametype':
+            obj = self.dict_stack[token.value]
+            self.execobj(obj, False)
+
+        elif token.type == 'operatortype':
+            token.value(self)
+
+
 
 interpreter = Interpreter()
 interpreter.execfile('testfiles/region.ps')
