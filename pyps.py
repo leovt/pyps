@@ -19,59 +19,14 @@ class PushBackIter:
 
 
 def scanps(source):
-    tokens = [[]]
+    tokens = []
 
     def emit(ttype, value):
-        print(ttype, repr(value))
-        tokens[-1].append((ttype, value))
-
-    def begin():
-        c = next(chars, None)
-        if c is None:
-            return
-
-        if c == '%':
-            while c != '\n':
-                c = next(chars)
-            return begin
-
-        if c in '\0 \t\n\r\f':
-            while c in '\0 \t\n\r\f':
-                c = next(chars)
-            chars.push(c)
-            return begin
-
-        if c == '(':
-            return string
-
-        if c == '/':
-            c = next(chars)
-            if c == '/':
-                return immname
-            chars.push(c)
-            return litname
-
-        if c in '[]':
-            emit('NAME', c)
-            return begin
-
-        if c == '{':
-            tokens.append([])
-            return begin
-        if c == '}':
-            assert len(tokens)>1, 'unmatched }'
-            emit('PROC', tokens.pop())
-            return begin
-
-        if c in '+-0123456789':
-            chars.push(c)
-            return number
-
-        if c == '\004':
-            return None
-
-        chars.push(c)
-        return name
+        if tokens:
+            tokens[-1].append(PSObject.from_token(ttype, value))
+        else:
+            print(ttype, repr(value))
+            yield PSObject.from_token(ttype, value)
 
     def string():
         nparen = 0
@@ -80,8 +35,7 @@ def scanps(source):
         while True:
             c = next(chars)
             if c == ')' and nparen == 0:
-                emit('STRING', value)
-                return begin
+                return value
             if c == '\\':
                 c = next(chars)
                 if c == 'n':
@@ -112,26 +66,6 @@ def scanps(source):
                     nparen -= 1
                     assert nparen >= 0
 
-    def immname():
-        value = ''
-        c = next(chars)
-        while c not in '\004\0 \t\n\r\f()<>[]{}/%':
-            value += c
-            c = next(chars)
-        emit('IMMNAME', value)
-        chars.push(c)
-        return begin
-
-    def litname():
-        value = ''
-        c = next(chars)
-        while c not in '\004\0 \t\n\r\f()<>[]{}/%':
-            value += c
-            c = next(chars)
-        emit('LITNAME', value)
-        chars.push(c)
-        return begin
-
     def name():
         value = ''
         c = next(chars)
@@ -139,9 +73,8 @@ def scanps(source):
         while c not in '\004\0 \t\n\r\f()<>[]{}/%':
             value += c
             c = next(chars)
-        emit('NAME', value)
         chars.push(c)
-        return begin
+        return value
 
     def number():
         value = ''
@@ -158,20 +91,66 @@ def scanps(source):
                 value = int(value)
             except ValueError:
                 value = float(value)
-        emit('NUMBER', value)
         chars.push(c)
-        return begin
+        return value
 
-
-
-    state = begin
     chars = PushBackIter(source)
 
-    while state:
-        state = state()
-    return tokens
+    while True:
+        c = next(chars, None)
+        if c is None:
+            return
 
-tokens = scanps(open('testfiles/region.ps').read())
+        if c == '%':
+            while c != '\n':
+                c = next(chars)
+            continue
+
+        if c in '\0 \t\n\r\f':
+            while c in '\0 \t\n\r\f':
+                c = next(chars)
+            chars.push(c)
+            continue
+
+        if c == '(':
+            yield from emit('STRING', string())
+            continue
+
+        if c == '/':
+            c = next(chars)
+            if c == '/':
+                yield from emit('IMMNAME', name())
+                continue
+            chars.push(c)
+            yield from emit('LITNAME', name())
+            continue
+
+        if c in '[]':
+            yield from emit('NAME', c)
+            continue
+
+        if c == '{':
+            tokens.append([])
+            continue
+        if c == '}':
+            assert tokens, 'unmatched }'
+            yield from emit('PROC', tokens.pop())
+            continue
+
+        if c in '+-0123456789':
+            chars.push(c)
+            yield from emit('NUMBER', number())
+            continue
+
+        if c == '\004':
+            return
+
+        chars.push(c)
+        yield from emit('NAME', name())
+        continue
+
+
+#tokens = list(scanps(open('testfiles/region.ps').read()))
 
 class DictStack:
     def __init__(self):
@@ -203,6 +182,9 @@ class PSObject:
         self.value = value
         self.literal = literal
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.type}, {self.value}, {self.literal})'
+
     @classmethod
     def from_token(cls, ttype, value):
         if ttype == 'NAME':
@@ -214,6 +196,10 @@ class PSObject:
                 return cls('integertype', value, True)
             else:
                 return cls('realtype', value, True)
+        if ttype == 'PROC':
+            return cls('arraytype', value, False)
+        assert False, f'unknown ttype {ttype}'
+
 
 
 class Interpreter:
@@ -231,6 +217,17 @@ class Interpreter:
         self.op_stack = []
         self.ex_stack = []
 
+    def execfile(self, fname):
+        self.ex_stack.append(scanps(open(fname).read()))
+        while self.ex_stack:
+            tokens = self.ex_stack[-1]
+            token = next(tokens, None)
+            if not token:
+                self.ex_stack.pop()
+                continue
+            if token.literal:
+                self.op_stack.append(token)
+                print('ops:', self.op_stack)
+
 interpreter = Interpreter()
-for t in tokens:
-    interpreter.read_token(*t)
+interpreter.execfile('testfiles/region.ps')
