@@ -2,6 +2,8 @@ import op_base
 import op_font
 import op_graphics
 
+from svgdevice import SVGDevice
+
 def populate(d, module):
     for key, value in module.__dict__.items():
         if key[:3] == 'op_':
@@ -209,6 +211,12 @@ class PSObject:
             return cls('arraytype', value, False)
         assert False, f'unknown ttype {ttype}'
 
+class GraphicsState:
+    def __init__(self):
+        self.current_path = []
+        self.color_space = 'DeviceRGB'
+        self.color = (0,0,0)
+        self.line_width = 1.0
 
 
 class Interpreter:
@@ -229,6 +237,9 @@ class Interpreter:
 
         self.op_stack = []
         self.ex_stack = []
+
+        self.graphics_state = GraphicsState()
+        self.page_device = SVGDevice()
 
     def execfile(self, fname):
         self.ex_stack.append(scanps(open(fname).read()))
@@ -258,3 +269,4 @@ class Interpreter:
 
 interpreter = Interpreter()
 interpreter.execfile('testfiles/region.ps')
+interpreter.page_device.write('testfiles/region.svg')
