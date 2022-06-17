@@ -1,8 +1,11 @@
 import op_base
+import op_dict
+import op_array
 import op_font
 import op_graphics
 
 from svgdevice import SVGDevice
+from psobject import PSObject
 
 def populate(d, module):
     for key, value in module.__dict__.items():
@@ -181,35 +184,17 @@ class DictStack:
             try:
                 return d[key]
             except KeyError:
-                pass
+                if d is self.stack[0]:
+                    raise
         raise KeyError
 
     def __setitem__(self, key, value):
         self.stack[-1][key] = value
 
-class PSObject:
-    def __init__(self, type, value, literal):
-        self.type = type
-        self.value = value
-        self.literal = literal
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}({self.type}, {self.value}, {self.literal})'
-
-    @classmethod
-    def from_token(cls, ttype, value):
-        if ttype == 'NAME':
-            return cls('nametype', value, False)
-        if ttype == 'LITNAME':
-            return cls('nametype', value, True)
-        if ttype == 'NUMBER':
-            if isinstance(value, int):
-                return cls('integertype', value, True)
-            else:
-                return cls('realtype', value, True)
-        if ttype == 'PROC':
-            return cls('arraytype', value, False)
-        assert False, f'unknown ttype {ttype}'
+    def where(self, key):
+        for d in reversed(self.stack):
+            if key in d:
+                return d
 
 class GraphicsState:
     def __init__(self):
@@ -218,20 +203,33 @@ class GraphicsState:
         self.color = (0,0,0)
         self.line_width = 1.0
 
-
 class Interpreter:
     def __init__(self):
         self.dict_stack = DictStack()
         self.userdict = {}
         self.globaldict = {}
+
+        self.mark = PSObject('marktype', None, True)
+        self.false = PSObject('booltype', False, True)
+        self.true = PSObject('booltype', True, True)
+        self.null = PSObject('nulltype', None, True)
+
         self.systemdict = {
-            'userdict': self.userdict,
-            'globaldict': self.globaldict}
+            'userdict': PSObject('dicttype', self.userdict, True),
+            'globaldict': PSObject('dicttype', self.globaldict, True),
+            'false': self.false,
+            'true': self.true,
+            'mark': self.mark, '[': self.mark, '<<': self.mark,
+            'statusdict': PSObject('dicttype', {}, True),
+            'product': PSObject('stringtype', 'PYPS', True),
+            }
         self.dict_stack.push(self.systemdict)
         self.dict_stack.push(self.globaldict)
         self.dict_stack.push(self.userdict)
 
         populate(self.systemdict, op_base)
+        populate(self.systemdict, op_dict)
+        populate(self.systemdict, op_array)
         populate(self.systemdict, op_font)
         populate(self.systemdict, op_graphics)
 
@@ -252,11 +250,12 @@ class Interpreter:
             self.execobj(token, True)
 
     def execobj(self, token, direct):
+        print('ops:', ' '.join(map(str, self.op_stack)))
+        print('tok:', token)
         if (token.literal
             or token.type in ('integertype', 'realtype', 'stringtype')
             or (token.type == 'arraytype' and direct)):
             self.op_stack.append(token)
-            print('ops:', self.op_stack)
 
         elif token.type == 'nametype':
             obj = self.dict_stack[token.value]
@@ -265,8 +264,24 @@ class Interpreter:
         elif token.type == 'operatortype':
             token.value(self)
 
+        elif token.type == 'arraytype':
+            self.ex_stack.append(iter(token.value))
+
+        else:
+            assert False, f'not implemented: {token}'
+
+    def bool(self, value):
+        if value:
+            return self.true
+        else:
+            return self.false
+
 
 
 interpreter = Interpreter()
 interpreter.execfile('testfiles/region.ps')
 interpreter.page_device.write('testfiles/region.svg')
+
+interpreter = Interpreter()
+interpreter.execfile('testfiles/policy.ps')
+interpreter.page_device.write('testfiles/policy.svg')
