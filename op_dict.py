@@ -18,7 +18,15 @@ def op_where(ip):
 def op_known(ip):
     a = ip.op_stack.pop().value
     b = ip.op_stack.pop().value
-    ip.op_stack.append(PSObject('realtype', a in b, True))
+    ip.op_stack.append(ip.bool(a in b))
+
+def op_get(ip):
+    a = ip.op_stack.pop().value
+    b = ip.op_stack.pop()
+    if b.type == 'stringtype':
+        ip.op_stack.append(PSObject('integertype', ord(b.value[a]), True))
+    else:
+        ip.op_stack.append(b.value[a])
 
 def op_put(ip):
     any = ip.op_stack.pop()

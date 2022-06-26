@@ -1,4 +1,16 @@
 import os
+import html
+import re
+
+def escape(txt):
+    return html.escape(re.sub(r'[\x00-\x1f\x7f-\x9f]', ' ', txt))
+
+def svgpath(sp):
+    if sp[0] == 'Z':
+        return 'Z'
+    else:
+        t,(x,y) = sp
+        return f'{t} {x} {841.9-y}'
 
 class SVGDevice:
     def __init__(self):
@@ -10,12 +22,26 @@ class SVGDevice:
         self.current_page = []
 
     def stroke(self, gs):
-        d = ' '.join(str(t) for subpath in gs.current_path
-                for segment in subpath
-                for t in segment)
+        d = ' '.join(svgpath(p) for subpath in gs.current_path
+                for p in subpath)
         r,g,b = gs.color
         color = f'rgb({100*r}%, {100*g}%, {100*b}%)'
         self.current_page.append(f'<path d="{d}" fill="None" stroke="{color}" stroke-width="{gs.line_width}"/>')
+
+    def fill(self, gs):
+        d = ' '.join(svgpath(p) for subpath in gs.current_path
+                for p in subpath)
+        r,g,b = gs.color
+        color = f'rgb({100*r}%, {100*g}%, {100*b}%)'
+        self.current_page.append(f'<path d="{d}" fill="{color}"/>')
+
+    def show(self, text, gs):
+        x,y = gs.transform(*gs.current_point)
+        #breakpoint()
+        s = gs.font.value.get('ScaleMatrix', 1)
+        s = 8
+        self.current_page.append(f'<text x="{x}" y="{841.9-y}" font-size="{s}">{escape(text)}</text>')
+        gs.current_point = (x+5*len(text), y)
 
     def write(self, fname):
         root, ext = os.path.splitext(fname)
@@ -31,9 +57,12 @@ class SVGDevice:
                         ' width="210mm"'
                         ' height="297mm"'
                         ' viewBox="0 0 595.3 841.9"'
-                        ' transform="translate(0, 841.9) scale(1, -1)"'
+                        #' transform="translate(0, 841.9) scale(1, -1)"'
                         '>\n')
 
                 for element in page:
                     f.write(f'  {element}\n')
                 f.write('</svg>\n')
+
+class GlyphDevice(SVGDevice):
+    pass

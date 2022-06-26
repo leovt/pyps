@@ -20,10 +20,16 @@ class PSObject:
         if self.type == 'operatortype':
             return self.value.__name__
         if self.type == 'dicttype':
-            return '<< --dict-- >>'
+            return f'<<{id(self)}>>'
         if self.type == 'stringtype':
+            return 's'+repr(self.value)
+        if self.type == 'nametype':
+            return 'n'+repr(self.value)
+        if self.type == 'realtype':
             return repr(self.value)
-        return str(self.value)
+        if self.type == 'integertype':
+            return repr(self.value)
+        return f'{self.type}({self.value!r})'
 
     @classmethod
     def from_token(cls, ttype, value):

@@ -1,3 +1,6 @@
+import copy
+import itertools
+
 import op_base
 import op_dict
 import op_array
@@ -39,8 +42,20 @@ def scanps(source):
         if tokens:
             tokens[-1].append(PSObject.from_token(ttype, value))
         else:
-            print(ttype, repr(value))
+            #print(ttype, repr(value))
             yield PSObject.from_token(ttype, value)
+
+    def hexstring():
+        value = ''
+
+        while True:
+            c = next(chars)
+            if c == '>':
+                return bytes.fromhex(value).decode('latin1')
+            elif c.lower() in '0123456789abcdef':
+                value += c.lower()
+            else:
+                assert c in ' \n\t', f'illegal cahracter {c!r} in <...>'
 
     def string():
         nparen = 0
@@ -68,7 +83,7 @@ def scanps(source):
                     c1 = next(chars)
                     assert c1 in '01234567'
                     c0 = next(chars)
-                    assert c2 in '01234567'
+                    assert c0 in '01234567'
                     value += chr(64*int(c) + 8*int(c1) + int(c0))
                 else:
                     assert False, f'illegal escape sequence \\{c}'
@@ -130,6 +145,10 @@ def scanps(source):
             yield from emit('STRING', string())
             continue
 
+        if c == '<':
+            yield from emit('STRING', hexstring())
+            continue
+
         if c == '/':
             c = next(chars)
             if c == '/':
@@ -151,7 +170,7 @@ def scanps(source):
             yield from emit('PROC', tokens.pop())
             continue
 
-        if c in '+-0123456789':
+        if c in '+-.0123456789':
             chars.push(c)
             yield from emit('NUMBER', number())
             continue
@@ -202,12 +221,58 @@ class GraphicsState:
         self.color_space = 'DeviceRGB'
         self.color = (0,0,0)
         self.line_width = 1.0
+        self.CTM = [1,0,0,1,0,0]
+
+    def transform(self, x, y):
+        a,b,c,d,tx,ty = self.CTM
+        return a*x + c*y + tx, b*x + d*y + ty
+
+    def itransform(self, x, y):
+        a,b,c,d,tx,ty = self.CTM
+        det = b*c - a*d
+        return (d*(tx-x) + c*(y-ty))/det, (a*(ty-y) + b*(x-tx))/det
+
+    def newpath(self):
+        self.current_path = []
+        self.current_point = None
+
+    def moveto(self, x, y):
+        print('moveto', x, y, self.CTM, self.transform(x,y))
+        self.current_path.append([('M', self.transform(x,y))])
+        self.current_point = (x,y)
+
+    def rmoveto(self, x, y):
+        print('rmoveto', x, y, self.CTM)
+        (u,v) = self.itransform(*self.current_point)
+        x += u
+        y += v
+        self.current_path.append([('M', self.transform(x,y))])
+        self.current_point = (x,y)
+
+    def lineto(self, x, y):
+        x,y = self.transform(x,y)
+        self.current_path.append([('L', self.transform(x,y))])
+        self.current_point = (x,y)
+
+    def rlineto(self, x, y):
+        (u,v) = self.current_point
+        x += u
+        y += v
+        self.current_path.append([('L', self.transform(x,y))])
+        self.current_point = (x,y)
+
+    def closepath(self):
+        self.current_path.append([('Z',)])
 
 class Interpreter:
     def __init__(self):
         self.dict_stack = DictStack()
         self.userdict = {}
         self.globaldict = {}
+
+        self.fonts = {}
+
+        self.ids = itertools.count(101)
 
         self.mark = PSObject('marktype', None, True)
         self.false = PSObject('booltype', False, True)
@@ -236,8 +301,18 @@ class Interpreter:
         self.op_stack = []
         self.ex_stack = []
 
-        self.graphics_state = GraphicsState()
+        self.graphics_state_stack = [GraphicsState()]
         self.page_device = SVGDevice()
+
+    @property
+    def graphics_state(self):
+        return self.graphics_state_stack[-1]
+
+    def gsave(self):
+        self.graphics_state_stack.append(copy.deepcopy(self.graphics_state))
+
+    def grestore(self):
+        self.graphics_state_stack.pop()
 
     def execfile(self, fname):
         self.ex_stack.append(scanps(open(fname).read()))
@@ -249,9 +324,29 @@ class Interpreter:
                 continue
             self.execobj(token, True)
 
+    def execsub(self, tokens):
+        sentinel = object()
+        self.ex_stack.append(sentinel)
+        self.ex_stack.append(tokens)
+        while self.ex_stack:
+            tokens = self.ex_stack[-1]
+            if tokens is sentinel:
+                self.ex_stack.pop()
+                return
+            token = next(tokens, None)
+            if not token:
+                self.ex_stack.pop()
+                continue
+            self.execobj(token, True)
+
+
     def execobj(self, token, direct):
-        print('ops:', ' '.join(map(str, self.op_stack)))
-        print('tok:', token)
+        # try:
+        #     print('ops:', ' '.join(map(str, self.op_stack)))
+        # except:
+        #     print('ops: --')
+        #     pass
+        # print('tok:', token)
         if (token.literal
             or token.type in ('integertype', 'realtype', 'stringtype')
             or (token.type == 'arraytype' and direct)):
@@ -269,6 +364,12 @@ class Interpreter:
 
         else:
             assert False, f'not implemented: {token}'
+        # try:
+        #     print('ops:', ' '.join(map(str, self.op_stack)))
+        # except:
+        #     print('ops: --')
+        # print()
+        assert all(isinstance(x, PSObject) for x in self.op_stack)
 
     def bool(self, value):
         if value:
@@ -278,10 +379,10 @@ class Interpreter:
 
 
 
-interpreter = Interpreter()
-interpreter.execfile('testfiles/region.ps')
-interpreter.page_device.write('testfiles/region.svg')
+# interpreter = Interpreter()
+# interpreter.execfile('testfiles/region.ps')
+# interpreter.page_device.write('testfiles/region.svg')
 
 interpreter = Interpreter()
-interpreter.execfile('testfiles/policy.ps')
-interpreter.page_device.write('testfiles/policy.svg')
+interpreter.execfile('testfiles/test_imagemask.ps')
+interpreter.page_device.write('testfiles/test_imagemask.svg')
