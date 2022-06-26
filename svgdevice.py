@@ -1,6 +1,10 @@
 import os
 import html
 import re
+import io
+import binascii
+from PIL import Image
+
 
 def escape(txt):
     return html.escape(re.sub(r'[\x00-\x1f\x7f-\x9f]', ' ', txt))
@@ -42,6 +46,29 @@ class SVGDevice:
         s = 8
         self.current_page.append(f'<text x="{x}" y="{841.9-y}" font-size="{s}">{escape(text)}</text>')
         gs.current_point = (x+5*len(text), y)
+
+    def imagemask(self, size, imagedata, invert, matrix, gs):
+        if invert:
+            alpha = imagedata
+            imagedata = bytes(255-x for x in imagedata)
+        else:
+            alpha = bytes(255-x for x in imagedata)
+        image = Image.frombytes('1', size, imagedata).convert('LA')
+        alpha = Image.frombytes('1', size, alpha).convert('L')
+        image.putalpha(alpha)
+        # TODO: this makes a much larger png than needed
+        bio = io.BytesIO()
+        image.save(bio, 'png')
+        b64 = binascii.b2a_base64(bio.getvalue(), newline=False).decode('ascii')
+        imageurl = f'data:image/png;base64,{b64}'
+        CTM = ' '.join(map(str, gs.CTM))
+        a,b,c,d,e,f = matrix
+        det = a*d-b*c
+        IMA = (d/det, -b/det, -c/det, a/det, (c*f-d*e)/det, (b*e-a*f)/det)
+        IMA = ' '.join(map(str, IMA))
+        self.current_page.append(f'<image width="{size[0]}" height="{size[1]}" href="{imageurl}" transform="scale(1 -1) translate(0 -841.9) matrix({CTM}) matrix({IMA}) scale(1 -1) translate(0 -{size[1]})" />')
+
+
 
     def write(self, fname):
         root, ext = os.path.splitext(fname)

@@ -135,7 +135,7 @@ def op_imagemask(ip):
     else:
         datasrc = d
         matrix = ip.op_stack.pop()
-        polarity = ip.op_stack.pop()
+        polarity = ip.op_stack.pop().value
         height = ip.op_stack.pop().value
         width = ip.op_stack.pop().value
 
@@ -148,4 +148,4 @@ def op_imagemask(ip):
         imagedata += ret
         if len(imagedata)*8 >= width*height:
             break
-    breakpoint()
+    ip.page_device.imagemask((width, height), imagedata.encode('latin1'), polarity, [x.value for x in matrix.value], ip.graphics_state)

@@ -240,6 +240,7 @@ class GraphicsState:
         print('moveto', x, y, self.CTM, self.transform(x,y))
         self.current_path.append([('M', self.transform(x,y))])
         self.current_point = (x,y)
+        print(self.current_path)
 
     def rmoveto(self, x, y):
         print('rmoveto', x, y, self.CTM)
@@ -248,21 +249,27 @@ class GraphicsState:
         y += v
         self.current_path.append([('M', self.transform(x,y))])
         self.current_point = (x,y)
+        print(self.current_path)
 
     def lineto(self, x, y):
-        x,y = self.transform(x,y)
+        print('lineto', x, y, self.CTM, self.transform(x,y))
         self.current_path.append([('L', self.transform(x,y))])
         self.current_point = (x,y)
+        print(self.current_path)
 
     def rlineto(self, x, y):
+        print('rlineto', x, y, self.CTM)
         (u,v) = self.current_point
         x += u
         y += v
         self.current_path.append([('L', self.transform(x,y))])
         self.current_point = (x,y)
+        print(self.current_path)
 
     def closepath(self):
+        print('closepath', self.CTM)
         self.current_path.append([('Z',)])
+        print(self.current_path)
 
 class Interpreter:
     def __init__(self):
