@@ -138,7 +138,6 @@ def op_imagemask(ip):
         polarity = ip.op_stack.pop().value
         height = ip.op_stack.pop().value
         width = ip.op_stack.pop().value
-
     imagedata = ''
     while True:
         ip.execsub(iter(datasrc.value))

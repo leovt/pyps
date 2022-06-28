@@ -240,7 +240,7 @@ class GraphicsState:
         print('moveto', x, y, self.CTM, self.transform(x,y))
         self.current_path.append([('M', self.transform(x,y))])
         self.current_point = (x,y)
-        print(self.current_path)
+        #print(self.current_path)
 
     def rmoveto(self, x, y):
         print('rmoveto', x, y, self.CTM)
@@ -249,13 +249,13 @@ class GraphicsState:
         y += v
         self.current_path.append([('M', self.transform(x,y))])
         self.current_point = (x,y)
-        print(self.current_path)
+        #print(self.current_path)
 
     def lineto(self, x, y):
         print('lineto', x, y, self.CTM, self.transform(x,y))
         self.current_path.append([('L', self.transform(x,y))])
         self.current_point = (x,y)
-        print(self.current_path)
+        #print(self.current_path)
 
     def rlineto(self, x, y):
         print('rlineto', x, y, self.CTM)
@@ -264,12 +264,12 @@ class GraphicsState:
         y += v
         self.current_path.append([('L', self.transform(x,y))])
         self.current_point = (x,y)
-        print(self.current_path)
+        #print(self.current_path)
 
     def closepath(self):
         print('closepath', self.CTM)
         self.current_path.append([('Z',)])
-        print(self.current_path)
+        #print(self.current_path)
 
 class Interpreter:
     def __init__(self):
@@ -348,12 +348,12 @@ class Interpreter:
 
 
     def execobj(self, token, direct):
-        # try:
-        #     print('ops:', ' '.join(map(str, self.op_stack)))
-        # except:
-        #     print('ops: --')
-        #     pass
-        # print('tok:', token)
+        try:
+            print('ops:', ' '.join(map(str, self.op_stack)))
+        except:
+            print('ops: --')
+            pass
+        print('tok:', token)
         if (token.literal
             or token.type in ('integertype', 'realtype', 'stringtype')
             or (token.type == 'arraytype' and direct)):
@@ -371,11 +371,11 @@ class Interpreter:
 
         else:
             assert False, f'not implemented: {token}'
-        # try:
-        #     print('ops:', ' '.join(map(str, self.op_stack)))
-        # except:
-        #     print('ops: --')
-        # print()
+        try:
+            print('ops:', ' '.join(map(str, self.op_stack)))
+        except:
+            print('ops: --')
+        print()
         assert all(isinstance(x, PSObject) for x in self.op_stack)
 
     def bool(self, value):
@@ -389,7 +389,8 @@ class Interpreter:
 # interpreter = Interpreter()
 # interpreter.execfile('testfiles/region.ps')
 # interpreter.page_device.write('testfiles/region.svg')
-
-interpreter = Interpreter()
-interpreter.execfile('testfiles/test_imagemask.ps')
-interpreter.page_device.write('testfiles/test_imagemask.svg')
+if __name__ == '__main__':
+    import sys
+    interpreter = Interpreter()
+    interpreter.execfile(sys.argv[1])
+    interpreter.page_device.write(sys.argv[2])

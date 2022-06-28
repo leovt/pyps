@@ -48,6 +48,7 @@ class SVGDevice:
         gs.current_point = (x+5*len(text), y)
 
     def imagemask(self, size, imagedata, pivot, matrix, gs):
+        orig = imagedata
         if not pivot:
             imagedata = bytes(255-x for x in imagedata)
         bio = io.BytesIO()
@@ -60,6 +61,7 @@ class SVGDevice:
         IMA = (d/det, -b/det, -c/det, a/det, (c*f-d*e)/det, (b*e-a*f)/det)
         IMA = ' '.join(map(str, IMA))
         self.current_page.append(f'<image width="{size[0]}" height="{size[1]}" href="{imageurl}" transform="scale(1 -1) translate(0 -841.9) matrix({CTM}) matrix({IMA}) scale(1 -1) translate(0 -{size[1]})" />')
+        self.current_page.append(f'<!-- original data {orig!r}-->')
 
     def write(self, fname):
         root, ext = os.path.splitext(fname)

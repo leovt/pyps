@@ -33,8 +33,10 @@ def pack_bits(bits):
 
 def png_mask(f, width, height, img):
 
-    bits = widen_bytes(img)
-    scanlines = [b'\0'+pack_bits(sl) for sl in grouper(bits, width, 0)][:height]
+    stride = (width+7)//8
+    #bits = widen_bytes(img)
+    #scanlines = [b'\0'+pack_bits(sl) for sl in grouper(bits, width, 0)][:height]
+    scanlines = [b'\0' + img[i:i+stride] for i in range(0,stride*height,stride)]
 
     f.write(PNGSIGNATURE)
     # png header for 1 bit palette

@@ -57,6 +57,7 @@ def op_definefont(ip):
         metrics.append((wx,wy,llx,lly,urx,ury))
         glyphdevice = svgdevice.GlyphDevice()
         glyphs.append(glyphdevice)
+        ip.page_device = glyphdevice
 
     def op_endfont(ip):
         r = ip.dict_stack.pop()
@@ -67,11 +68,13 @@ def op_definefont(ip):
         ip.fonts[fid] = fontobj
         ip.op_stack.append(font)
         for i, glyph in enumerate(glyphs):
+            #breakpoint()
             glyph.showpage(ip.graphics_state)
 
             fname = f'fonts/font_{fid}_glyph_{i:03d}.svg'
             import os
-            os.mkdirs('fonts')
+            if not os.path.exists('fonts'):
+                os.makedirs('fonts')
             print(fname, os.path.abspath(fname))
             glyph.write(fname)
 
