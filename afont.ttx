@@ -8,6 +8,8 @@
     <GlyphID id="2" name="CR"/>
     <GlyphID id="3" name="space"/>
     <GlyphID id="4" name="period"/>
+    <GlyphID name="A"/>
+    <GlyphID name="F"/>
     <GlyphID id="5" name="ellipsis"/>
   </GlyphOrder>
 
@@ -49,12 +51,12 @@
     <reserved2 value="0"/>
     <reserved3 value="0"/>
     <metricDataFormat value="0"/>
-    <numberOfHMetrics value="6"/>
+    <numberOfHMetrics value="8"/>
   </hhea>
 
   <maxp>
     <tableVersion value="0x5000"/>
-    <numGlyphs value="6"/>
+    <numGlyphs value="8"/>
   </maxp>
 
   <OS_2>
@@ -201,6 +203,8 @@
       <map code="0xd" name="CR"/><!-- ???? -->
       <map code="0x20" name="space"/><!-- SPACE -->
       <map code="0x2e" name="period"/><!-- FULL STOP -->
+      <map code="0x41" name="A"/>
+      <map code="0x46" name="F"/>
       <map code="0x2026" name="ellipsis"/><!-- HORIZONTAL ELLIPSIS -->
     </cmap_format_4>
     <cmap_format_6 platformID="1" platEncID="0" language="0">
@@ -269,12 +273,12 @@
       <map code="0x3e" name=".notdef"/>
       <map code="0x3f" name=".notdef"/>
       <map code="0x40" name=".notdef"/>
-      <map code="0x41" name=".notdef"/>
+      <map code="0x41" name="A"/>
       <map code="0x42" name=".notdef"/>
       <map code="0x43" name=".notdef"/>
       <map code="0x44" name=".notdef"/>
       <map code="0x45" name=".notdef"/>
-      <map code="0x46" name=".notdef"/>
+      <map code="0x46" name="F"/>
       <map code="0x47" name=".notdef"/>
       <map code="0x48" name=".notdef"/>
       <map code="0x49" name=".notdef"/>
@@ -412,6 +416,8 @@
       <map code="0xd" name="CR"/><!-- ???? -->
       <map code="0x20" name="space"/><!-- SPACE -->
       <map code="0x2e" name="period"/><!-- FULL STOP -->
+      <map code="0x41" name="A"/>
+      <map code="0x46" name="F"/>
       <map code="0x2026" name="ellipsis"/><!-- HORIZONTAL ELLIPSIS -->
     </cmap_format_4>
   </cmap>
@@ -486,6 +492,20 @@
           -107 callsubr
           endchar
         </CharString>
+        <CharString name="A">
+          723 55 hmoveto
+          -107 callsubr
+          241 -122 rmoveto
+          -107 callsubr
+          241 -122 rmoveto
+          -107 callsubr
+          endchar
+        </CharString>
+        <CharString name="F">
+          50 50 rmoveto
+          150 50 -50 150 50 -50 50 150 -50 -50 -50 150 150 -50 50 100 -300 -50 50 -350 -50 hlineto
+          endchar
+        </CharString>
         <CharString name="period">
           241 55 hmoveto
           -107 callsubr
@@ -507,6 +527,8 @@
     <mtx name=".null" width="0" lsb="0"/>
     <mtx name="CR" width="250" lsb="0"/>
     <mtx name="ellipsis" width="723" lsb="55"/>
+    <mtx name="A" width="723" lsb="55"/>
+    <mtx name="F" width="723" lsb="55"/>
     <mtx name="period" width="241" lsb="55"/>
     <mtx name="space" width="250" lsb="0"/>
   </hmtx>
