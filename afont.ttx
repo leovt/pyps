@@ -3,14 +3,13 @@
 
   <GlyphOrder>
     <!-- The 'id' attribute is only for humans; it is ignored when parsed. -->
-    <GlyphID id="0" name=".notdef"/>
-    <GlyphID id="1" name=".null"/>
-    <GlyphID id="2" name="CR"/>
-    <GlyphID id="3" name="space"/>
-    <GlyphID id="4" name="period"/>
-    <GlyphID id="5" name="A"/>
-    <GlyphID id="6" name="F"/>
-    <GlyphID id="7" name="ellipsis"/>
+    <GlyphID name=".notdef"/>
+    <GlyphID name="space"/>
+    <GlyphID name="period"/>
+    <GlyphID name="A"/>
+    <GlyphID name="F"/>
+    <GlyphID name="r"/>
+    <GlyphID name="ellipsis"/>
   </GlyphOrder>
 
   <head>
@@ -162,30 +161,27 @@
   <cmap>
     <tableVersion version="0"/>
     <cmap_format_4 platformID="0" platEncID="3" language="0">
-      <map code="0x0" name=".null"/><!-- ???? -->
-      <map code="0xd" name="CR"/><!-- ???? -->
       <map code="0x20" name="space"/><!-- SPACE -->
       <map code="0x2e" name="period"/><!-- FULL STOP -->
       <map code="0x41" name="A"/><!-- LATIN CAPITAL LETTER A -->
       <map code="0x46" name="F"/><!-- LATIN CAPITAL LETTER F -->
+      <map code="0x72" name="r"/>
       <map code="0x2026" name="ellipsis"/><!-- HORIZONTAL ELLIPSIS -->
     </cmap_format_4>
     <cmap_format_6 platformID="1" platEncID="0" language="0">
-      <map code="0x0" name=".null"/>
-      <map code="0xd" name="CR"/>
       <map code="0x20" name="space"/>
       <map code="0x2e" name="period"/>
       <map code="0x41" name="A"/>
       <map code="0x46" name="F"/>
+      <map code="0x72" name="r"/>
       <map code="0xc9" name="ellipsis"/>
     </cmap_format_6>
     <cmap_format_4 platformID="3" platEncID="1" language="0">
-      <map code="0x0" name=".null"/>
-      <map code="0xd" name="CR"/>
       <map code="0x20" name="space"/>
       <map code="0x2e" name="period"/>
       <map code="0x41" name="A"/>
       <map code="0x46" name="F"/>
+      <map code="0x72" name="r"/>
       <map code="0x2026" name="ellipsis"/>
     </cmap_format_4>
   </cmap>
@@ -248,9 +244,6 @@
           650 300 -650 vlineto
           endchar
         </CharString>
-        <CharString name=".null">
-          0 endchar
-        </CharString>
         <CharString name="A">
           723 50 50 rmoveto
           150 50 -50 50 200 -50 -50 -50 150 50 -50 150 -50 100 -50 150 -50 -150 -50 -100 -50 -100 -50 -50 -50 -50 hlineto
@@ -258,12 +251,16 @@
           50 50 100 50 -100 50 -50 -150 vlineto
           endchar
         </CharString>
-        <CharString name="CR">
-          250 endchar
-        </CharString>
         <CharString name="F">
           723 50 50 rmoveto
           150 50 -50 150 50 -50 50 150 -50 -50 -50 150 150 -50 50 100 -300 -50 50 -350 -50 hlineto
+          endchar
+        </CharString>
+        <CharString name="r">
+          500 450 hmoveto
+          750 -400 -750 vlineto
+          50 50 rmoveto
+          650 300 -650 vlineto
           endchar
         </CharString>
         <CharString name="ellipsis">
@@ -293,9 +290,8 @@
 
   <hmtx>
     <mtx name=".notdef" width="500" lsb="50"/>
-    <mtx name=".null" width="0" lsb="0"/>
+    <mtx name="r" width="500" lsb="50"/>
     <mtx name="A" width="723" lsb="55"/>
-    <mtx name="CR" width="250" lsb="0"/>
     <mtx name="F" width="723" lsb="55"/>
     <mtx name="ellipsis" width="723" lsb="55"/>
     <mtx name="period" width="241" lsb="55"/>
