@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ttFont sfntVersion="OTTO">
+
+  <GlyphOrder>
+    {glyph_id_tags}
+  </GlyphOrder>
+
+  <head>
+    <tableVersion value="1.0"/>
+    <fontRevision value="1.0"/>
+    <checkSumAdjustment value="0"/>
+    <magicNumber value="0x5f0f3cf5"/>
+    <flags value="00000000 00000011"/>
+    <unitsPerEm value="1000"/>
+    <created value="{created_timestamp}"/>
+    <modified value="{created_timestamp}"/>
+    <xMin value="0"/>
+    <yMin value="0"/>
+    <xMax value="0"/>
+    <yMax value="0"/>
+    <macStyle value="00000000 00000000"/>
+    <lowestRecPPEM value="9"/>
+    <fontDirectionHint value="2"/>
+    <indexToLocFormat value="0"/>
+    <glyphDataFormat value="0"/>
+  </head>
+
+  <hhea>
+    <tableVersion value="0x00010000"/>
+    <ascent value="{ascent}"/>
+    <descent value="{descent}"/>
+    <lineGap value="{line_gap}"/>
+    <advanceWidthMax value="0"/>
+    <minLeftSideBearing value="0"/>
+    <minRightSideBearing value="0"/>
+    <xMaxExtent value="0"/>
+    <caretSlopeRise value="1"/>
+    <caretSlopeRun value="0"/>
+    <caretOffset value="0"/>
+    <reserved0 value="0"/>
+    <reserved1 value="0"/>
+    <reserved2 value="0"/>
+    <reserved3 value="0"/>
+    <metricDataFormat value="0"/>
+    <numberOfHMetrics value="0"/>
+  </hhea>
+
+  <maxp>
+    <tableVersion value="0x5000"/>
+    <numGlyphs value="0"/>
+  </maxp>
+
+  <OS_2>
+    <!-- The fields 'usFirstCharIndex' and 'usLastCharIndex'
+         will be recalculated by the compiler -->
+    <version value="5"/>
+    <xAvgCharWidth value="{avg_char_width}"/>
+    <usWeightClass value="400"/>
+    <usWidthClass value="5"/>
+    <fsType value="00000000 00000000"/>
+    <ySubscriptXSize value="700"/>
+    <ySubscriptYSize value="650"/>
+    <ySubscriptXOffset value="0"/>
+    <ySubscriptYOffset value="140"/>
+    <ySuperscriptXSize value="700"/>
+    <ySuperscriptYSize value="650"/>
+    <ySuperscriptXOffset value="0"/>
+    <ySuperscriptYOffset value="477"/>
+    <yStrikeoutSize value="50"/>
+    <yStrikeoutPosition value="250"/>
+    <sFamilyClass value="0"/>
+    <panose>
+      <bFamilyType value="2"/>
+      <bSerifStyle value="11"/>
+      <bWeight value="6"/>
+      <bProportion value="4"/>
+      <bContrast value="4"/>
+      <bStrokeVariation value="2"/>
+      <bArmStyle value="7"/>
+      <bLetterForm value="8"/>
+      <bMidline value="1"/>
+      <bXHeight value="4"/>
+    </panose>
+    <ulUnicodeRange1 value="10000000 00000000 00000000 00000001"/>
+    <ulUnicodeRange2 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange3 value="00000000 00000000 00000000 00000000"/>
+    <ulUnicodeRange4 value="00000000 00000000 00000000 00000000"/>
+    <achVendID value="    "/>
+    <fsSelection value="00000000 01000000"/>
+    <usFirstCharIndex value="0"/>
+    <usLastCharIndex value="0"/>
+    <sTypoAscender value="{ascent}"/>
+    <sTypoDescender value="{descent}"/>
+    <sTypoLineGap value="{line_gap}"/>
+    <usWinAscent value="{win_ascent}"/>
+    <usWinDescent value="{win_descent}"/>
+    <ulCodePageRange1 value="00000000 00000000 00000000 00000001"/>
+    <ulCodePageRange2 value="00000000 00000000 00000000 00000000"/>
+    <sxHeight value="500"/>
+    <sCapHeight value="700"/>
+    <usDefaultChar value="0"/>
+    <usBreakChar value="32"/>
+    <usMaxContext value="0"/>
+    <usLowerOpticalPointSize value="0.0"/>
+    <usUpperOpticalPointSize value="3276.75"/>
+  </OS_2>
+
+  <name>
+    <namerecord nameID="0" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Unknown
+    </namerecord>
+    <namerecord nameID="1" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      {family_name}
+    </namerecord>
+    <namerecord nameID="2" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      unique id bb8c8504-17f0-42b8-b9ac-eea9a7f3a0dc
+    </namerecord>
+    <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      {family_name} Regular
+    </namerecord>
+    <namerecord nameID="5" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      Version 1.000
+    </namerecord>
+    <namerecord nameID="6" platformID="1" platEncID="0" langID="0x0" unicode="True">
+      {family_name}-Regular
+    </namerecord>
+    <namerecord nameID="0" platformID="3" platEncID="1" langID="0x409">
+      Unknown
+    </namerecord>
+    <namerecord nameID="1" platformID="3" platEncID="1" langID="0x409">
+      {family_name}
+    </namerecord>
+    <namerecord nameID="2" platformID="3" platEncID="1" langID="0x409">
+      Regular
+    </namerecord>
+    <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
+      unique id bb8c8504-17f0-42b8-b9ac-eea9a7f3a0dc
+    </namerecord>
+    <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
+      {family_name} Regular
+    </namerecord>
+    <namerecord nameID="5" platformID="3" platEncID="1" langID="0x409">
+      Version 1.000
+    </namerecord>
+    <namerecord nameID="6" platformID="3" platEncID="1" langID="0x409">
+      {family_name}-Regular
+    </namerecord>
+  </name>
+
+  <cmap>
+    <tableVersion version="0"/>
+    <cmap_format_4 platformID="0" platEncID="3" language="0"> <!-- unicode BMP -->
+      {unicode_map_tags}
+    </cmap_format_4>
+    <cmap_format_4 platformID="3" platEncID="1" language="0"> <!-- unicode BMP -->
+      {unicode_map_tags}
+    </cmap_format_4>
+  </cmap>
+
+  <post>
+    <formatType value="3.0"/>
+    <italicAngle value="0.0"/>
+    <underlinePosition value="-75"/>
+    <underlineThickness value="50"/>
+    <isFixedPitch value="0"/>
+    <minMemType42 value="0"/>
+    <maxMemType42 value="0"/>
+    <minMemType1 value="0"/>
+    <maxMemType1 value="0"/>
+  </post>
+
+  <CFF>
+    <major value="1"/>
+    <minor value="0"/>
+    <CFFFont name="{family_name}-Regular">
+      <version value="001.001"/>
+      <Notice value="Unknown"/>
+      <FullName value="{family_name} Regular"/>
+      <FamilyName value="{family_name}"/>
+      <Weight value="Regular"/>
+      <isFixedPitch value="0"/>
+      <ItalicAngle value="0"/>
+      <UnderlinePosition value="-100"/>
+      <UnderlineThickness value="50"/>
+      <PaintType value="0"/>
+      <CharstringType value="2"/>
+      <FontMatrix value="0.001 0 0 0.001 0 0"/>
+      <FontBBox value="0 0 0 0"/>
+      <StrokeWidth value="0"/>
+      <!-- charset is dumped separately as the 'GlyphOrder' element -->
+      <Encoding name="StandardEncoding"/>
+      <Private>
+        <BlueScale value="0.039625"/>
+        <BlueShift value="7"/>
+        <BlueFuzz value="1"/>
+        <ForceBold value="0"/>
+        <LanguageGroup value="0"/>
+        <ExpansionFactor value="0.06"/>
+        <initialRandomSeed value="0"/>
+        <defaultWidthX value="0"/>
+        <nominalWidthX value="0"/>
+        </Subrs>
+      </Private>
+      <CharStrings>
+        {charstring_tags}
+      </CharStrings>
+    </CFFFont>
+
+    <GlobalSubrs>
+    </GlobalSubrs>
+  </CFF>
+
+  <hmtx>
+    {mtx_tags}
+  </hmtx>
+
+  <DSIG>
+    <!-- note that the Digital Signature will be invalid after recompilation! -->
+    <tableHeader flag="0x0" numSigs="0" version="1"/>
+  </DSIG>
+
+</ttFont>
