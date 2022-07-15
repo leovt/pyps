@@ -12,8 +12,8 @@
     <magicNumber value="0x5f0f3cf5"/>
     <flags value="00000000 00000011"/>
     <unitsPerEm value="1000"/>
-    <created value="{created_timestamp}"/>
-    <modified value="{created_timestamp}"/>
+    <created value="{created_dt:%a %b %d %H:%M:%S %Y}"/>
+    <modified value="{created_dt:%a %b %d %H:%M:%S %Y}"/>
     <xMin value="0"/>
     <yMin value="0"/>
     <xMax value="0"/>
@@ -116,7 +116,7 @@
       Regular
     </namerecord>
     <namerecord nameID="3" platformID="1" platEncID="0" langID="0x0" unicode="True">
-      unique id bb8c8504-17f0-42b8-b9ac-eea9a7f3a0dc
+      {unique_id}
     </namerecord>
     <namerecord nameID="4" platformID="1" platEncID="0" langID="0x0" unicode="True">
       {family_name} Regular
@@ -137,7 +137,7 @@
       Regular
     </namerecord>
     <namerecord nameID="3" platformID="3" platEncID="1" langID="0x409">
-      unique id bb8c8504-17f0-42b8-b9ac-eea9a7f3a0dc
+      {unique_id}
     </namerecord>
     <namerecord nameID="4" platformID="3" platEncID="1" langID="0x409">
       {family_name} Regular
@@ -202,7 +202,6 @@
         <initialRandomSeed value="0"/>
         <defaultWidthX value="0"/>
         <nominalWidthX value="0"/>
-        </Subrs>
       </Private>
       <CharStrings>
         {charstring_tags}
