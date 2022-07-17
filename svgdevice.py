@@ -5,6 +5,8 @@ import io
 import binascii
 
 import png
+import bmoutline
+from png import widen_bytes
 
 def escape(txt):
     return html.escape(re.sub(r'[\x00-\x1f\x7f-\x9f]', ' ', txt))
@@ -20,6 +22,7 @@ class SVGDevice:
     def __init__(self):
         self.pages = []
         self.current_page = []
+        self.options = {'imagemask_as_png': False}
 
     def showpage(self, gs):
         self.pages.append(self.current_page)
@@ -51,17 +54,25 @@ class SVGDevice:
         orig = imagedata
         if not pivot:
             imagedata = bytes(255-x for x in imagedata)
-        bio = io.BytesIO()
-        png.png_mask(bio, *size, imagedata)
-        b64 = binascii.b2a_base64(bio.getvalue(), newline=False).decode('ascii')
-        imageurl = f'data:image/png;base64,{b64}'
         CTM = ' '.join(map(str, gs.CTM))
         a,b,c,d,e,f = matrix
         det = a*d-b*c
         IMA = (d/det, -b/det, -c/det, a/det, (c*f-d*e)/det, (b*e-a*f)/det)
         IMA = ' '.join(map(str, IMA))
-        self.current_page.append(f'<image width="{size[0]}" height="{size[1]}" href="{imageurl}" transform="scale(1 -1) translate(0 -841.9) matrix({CTM}) matrix({IMA})" />')
+        if self.options['imagemask_as_png']:
+            bio = io.BytesIO()
+            png.png_mask(bio, *size, imagedata)
+            b64 = binascii.b2a_base64(bio.getvalue(), newline=False).decode('ascii')
+            imageurl = f'data:image/png;base64,{b64}'
+            self.current_page.append(f'<image width="{size[0]}" height="{size[1]}" href="{imageurl}" transform="scale(1 -1) translate(0 -841.9) matrix({CTM}) matrix({IMA})" />')
+        else:
+            width, height = size
+            stride = (width+7)//8
+            bitmap = [list(widen_bytes(imagedata[i:i+stride]))[:width] for i in range(0,stride*height,stride)]
+            path = bmoutline.edges(bitmap)
+            self.current_page.append(f'<path d="{path.svg()}" transform="scale(1 -1) translate(0 -841.9) matrix({CTM}) matrix({IMA})" />')
         self.current_page.append(f'<!-- original data {orig!r}-->')
+
 
     def write(self, fname):
         root, ext = os.path.splitext(fname)
