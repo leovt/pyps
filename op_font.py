@@ -1,5 +1,7 @@
 from psobject import PSObject
-import svgdevice
+#import svgdevice
+import cffdevice
+import makefont
 
 class Font:
     def __init__(self, fontdict, metrics):
@@ -46,6 +48,8 @@ def op_definefont(ip):
     glyphs = []
 
     originaldevice = ip.page_device
+    ip.gsave()
+    ip.graphics_state.CTM = [x.value for x in FontMatrix]
 
     def op_setcachedevice(ip):
         ury = ip.op_stack.pop().value
@@ -55,29 +59,30 @@ def op_definefont(ip):
         wy = ip.op_stack.pop().value
         wx = ip.op_stack.pop().value
         metrics.append((wx,wy,llx,lly,urx,ury))
-        glyphdevice = svgdevice.GlyphDevice()
+        glyphdevice = cffdevice.CFFDevice()
         glyphs.append(glyphdevice)
         ip.page_device = glyphdevice
 
     def op_endfont(ip):
         r = ip.dict_stack.pop()
+        ip.grestore()
         ip.page_device = originaldevice
         fid = next(ip.ids)
         font.value['FID'] = PSObject('fonttype', fid, True)
         fontobj = Font(font, metrics)
+        fontobj.ttx = makefont.Font()
+        fontobj.ttx.family_name = f'FID{fid}'
+        fontobj.ttx.font_matrix = ' '.join(str(x.value) for x in font.value['FontMatrix'].value)
         ip.fonts[fid] = fontobj
         ip.op_stack.append(font)
-        for i, glyph in enumerate(glyphs):
-            #breakpoint()
-            glyph.showpage(ip.graphics_state)
-
-            fname = f'fonts/font_{fid}_glyph_{i:03d}.svg'
-            import os
-            if not os.path.exists('fonts'):
-                os.makedirs('fonts')
-            print(fname, os.path.abspath(fname))
-            glyph.write(fname)
-
+        for i, (glyph, mtx) in enumerate(zip(glyphs,metrics)):
+            glname = makefont.glyphname.get(i, f'glyph{i:04x}')
+            cs = f'{mtx[0]} {" ".join(glyph.current_page)} endchar'
+            fontobj.ttx.glyphs.append(makefont.Glyph(name=glname, code_point=i, width=mtx[0], lsb=mtx[2], charstring=cs))
+            print(glname)
+        with open(f'fonts/FID{fid}.ttx', 'w') as f:
+            fontobj.ttx.write_ttx(f)
+        breakpoint()
 
 
     proc = font.value['BuildChar']

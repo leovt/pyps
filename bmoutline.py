@@ -83,7 +83,7 @@ def edges(bm):
         i,j = next(points)
         path.moveto(j,i)
         for i,j in points:
-            path.lineto(i,j)
+            path.lineto(j,i)
         e = find_he()
     return path
 

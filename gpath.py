@@ -43,10 +43,15 @@ class Path:
                 pass
             if el[0] == 'M':
                 x, y = el[1], el[2]
-                return f'{x-x0} {y-y0} rmoveto '
+                r = f'{x-x0} {y-y0} rmoveto'
                 x0, y0 = x, y
+                return r
             if el[0] == 'L':
                 x, y = el[1], el[2]
-                return f'{x-x0} {y-y0} rlineto '
+                r = f'{x-x0} {y-y0} rlineto'
                 x0, y0 = x, y
-        return ''.join(map(transform, self.elements))
+                return r
+        return '\n'.join(map(transform, self.elements))
+
+    def transform(self, a, b, c, d, e, f):
+        self.elements = [(t, a*x+c*y+e, b*x+d*y+f) for (t,x,y) in self.elements]

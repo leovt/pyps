@@ -20,6 +20,18 @@ import datetime
 import uuid
 from dataclasses import dataclass
 
+glyphname = {}
+with open('glyphlist.txt') as f:
+    for line in f:
+        if line.startswith('#'):
+            continue
+        name, codepoint = line.split(';')
+        codepoint = int(codepoint.strip().replace(' ', ''), 16)
+        if codepoint in glyphname:
+            print(f'another name for {codepoint:04X} {glyphname[codepoint]} - {name}')
+        else:
+            glyphname[codepoint] = name.strip()
+
 @dataclass
 class Glyph:
     name: str
@@ -74,6 +86,7 @@ class Font:
             'line_gap': '0',
             'win_ascent': '0',
             'win_descent': '0',
+            'font_matrix': self.font_matrix,
             'family_name': self.family_name,
             'unique_id': uuid.uuid4(),
             'glyph_id_tags': '\n'.join(g.glyph_id_tag() for g in self.glyphs),
@@ -86,6 +99,7 @@ class Font:
 if __name__ == '__main__':
     font = Font()
     font.family_name = 'F1'
+    font.font_matrix = '0.001 0 0 0.001 0 0'
     font.glyphs.append(Glyph(name='A', code_point=0x41, width=450, lsb=50,
         charstring='''450 50 50 rmoveto
 150 50 -50 50 200 -50 -50 -50 150 50 -50 150 -50 100 -50 150 -50 -150 -50 -100 -50 -100 -50 -50 -50 -50 hlineto
