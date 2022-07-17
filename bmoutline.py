@@ -1,3 +1,5 @@
+import gpath
+
 bitmap =  [
     [0,1,1,1,1,0,0,0,0,0,0],
     [1,1,1,1,1,1,0,1,0,1,0],
@@ -74,18 +76,18 @@ def edges(bm):
             if (i,j,d) == (i0, j0, d0):
                 break
 
-    path = []
+    path = gpath.Path()
     e = find_he()
     while e is not None:
-        path.append('M')
-        for i,j in follow_cycle(*e):
-            path.append(str(j))
-            path.append(' ')
-            path.append(str(i))
-            path.append('L')
-        path[-1] = 'Z'
+        points = iter(follow_cycle(*e))
+        i,j = next(points)
+        path.moveto(j,i)
+        for i,j in points:
+            path.lineto(i,j)
         e = find_he()
-    path = ''.join(path)
-    print(f'<path d="{path}" fill="black" />')
+    return path
 
-edges(bitmap)
+if __name__ == '__main__':
+    path = edges(bitmap)
+    print(path.svg())
+    print(path.cff())
