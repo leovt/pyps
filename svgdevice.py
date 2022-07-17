@@ -60,7 +60,7 @@ class SVGDevice:
         det = a*d-b*c
         IMA = (d/det, -b/det, -c/det, a/det, (c*f-d*e)/det, (b*e-a*f)/det)
         IMA = ' '.join(map(str, IMA))
-        self.current_page.append(f'<image width="{size[0]}" height="{size[1]}" href="{imageurl}" transform="scale(1 -1) translate(0 -841.9) matrix({CTM}) matrix({IMA}) scale(1 -1) translate(0 -{size[1]})" />')
+        self.current_page.append(f'<image width="{size[0]}" height="{size[1]}" href="{imageurl}" transform="scale(1 -1) translate(0 -841.9) matrix({CTM}) matrix({IMA})" />')
         self.current_page.append(f'<!-- original data {orig!r}-->')
 
     def write(self, fname):
