@@ -1,5 +1,5 @@
 from psobject import PSObject
-#import svgdevice
+import svgdevice
 import cffdevice
 import makefont
 
@@ -21,20 +21,20 @@ def op_show(ip):
     ip.page_device.show(text, gs)
 
 def op_findfont(ip):
-    font = ip.op_stack[-1]
-    print(f'findfont {font=}')
+    key = ip.op_stack.pop()
+    print(f'findfont {key=}')
+    ip.op_stack.append(ip.fonts[key])
 
 def op_scalefont(ip):
-    scale = ip.op_stack.pop()
-    font = ip.op_stack.pop()
+    scale = ip.op_stack.pop().value
+    font = ip.op_stack[-1] #TODO: should we make a copy instead of modifying in place?
     print(f'scalefont {scale=}')
     sm = font.value.get('ScaleMatrix', 1)
     sm *= scale
     font.value['ScaleMatrix'] = sm
-    ma = list(font.value['FontMatrix'])
-    ma[0] *= scale
-    ma[3] *= scale
-    font.value['FontMatrix'] = ma
+    ma = font.value['FontMatrix'].value
+    ma[0].value *= scale
+    ma[3].value *= scale
 
 def op_definefont(ip):
     from op_base import op_exec
@@ -59,6 +59,7 @@ def op_definefont(ip):
         wy = ip.op_stack.pop().value
         wx = ip.op_stack.pop().value
         metrics.append((wx,wy,llx,lly,urx,ury))
+        #glyphdevice = svgdevice.GlyphDevice()
         glyphdevice = cffdevice.CFFDevice()
         glyphs.append(glyphdevice)
         ip.page_device = glyphdevice
@@ -73,25 +74,29 @@ def op_definefont(ip):
         fontobj.ttx = makefont.Font()
         fontobj.ttx.family_name = f'FID{fid}'
         fontobj.ttx.font_matrix = ' '.join(str(x.value) for x in font.value['FontMatrix'].value)
-        ip.fonts[fid] = fontobj
+        ip.fonts[key] = font
         ip.op_stack.append(font)
+
         for i, (glyph, mtx) in enumerate(zip(glyphs,metrics)):
             glname = makefont.glyphname.get(i, f'glyph{i:04x}')
             cs = f'{mtx[0]} {" ".join(glyph.current_page)} endchar'
             fontobj.ttx.glyphs.append(makefont.Glyph(name=glname, code_point=i, width=mtx[0], lsb=mtx[2], charstring=cs))
             print(glname)
+
+        em = 4 * fontobj.ttx.avg_char_width() # rule of thumb for latin
+
         with open(f'fonts/FID{fid}.ttx', 'w') as f:
             fontobj.ttx.write_ttx(f)
-        breakpoint()
 
 
     proc = font.value['BuildChar']
 
     ip.dict_stack.push({'setcachedevice': PSObject('operatortype', op_setcachedevice, False)})
-    for_exec = (x for i,charname in enumerate(font.value['base'].value) for x in (
+    for_exec = (x for i in range(65) for x in (
                                 font, PSObject('integertype', i, True), proc, PSObject('operatortype', op_exec, False)))
     ip.ex_stack.append(iter([PSObject('operatortype', op_endfont, False)]))
     ip.ex_stack.append(iter(for_exec))
+
 
 def op_setfont(ip):
     font = ip.op_stack.pop()

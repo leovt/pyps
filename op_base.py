@@ -39,6 +39,14 @@ def op_neg(ip):
     a = ip.op_stack.pop().value
     ip.op_stack.append(PSObject('realtype', -a, True))
 
+def op_not(ip):
+    a = ip.op_stack.pop()
+    if a.type == 'booltype':
+        ip.op_stack.append(ip.bool(not a.value))
+    else:
+        assert int(a.value) == a.value
+        ip.op_stack.append(PSObject('integertype', ~int(a.value), True))
+
 def op_round(ip):
     a = ip.op_stack.pop().value
     ip.op_stack.append(PSObject('realtype', int(a+0.5), True))
@@ -187,3 +195,6 @@ def op_copy(ip):
             assert False
 def op_type(ip):
     ip.op_stack.append(PSObject('nametype', ip.op_stack.pop().type, False))
+
+def op_currentdict(ip):
+    ip.op_stack.append(PSObject('dicttype', ip.dict_stack.top(), True))

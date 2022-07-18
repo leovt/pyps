@@ -29,15 +29,15 @@ class SVGDevice:
         self.current_page = []
 
     def stroke(self, gs):
-        d = ' '.join(svgpath(p) for subpath in gs.current_path
-                for p in subpath)
+        gs.current_path.transform(1, 0, 0, -1, 0, 841.9)
+        d = gs.current_path.svg()
         r,g,b = gs.color
         color = f'rgb({100*r}%, {100*g}%, {100*b}%)'
         self.current_page.append(f'<path d="{d}" fill="None" stroke="{color}" stroke-width="{gs.line_width}"/>')
 
     def fill(self, gs):
-        d = ' '.join(svgpath(p) for subpath in gs.current_path
-                for p in subpath)
+        gs.current_path.transform(1, 0, 0, -1, 0, 841.9)
+        d = gs.current_path.svg()
         r,g,b = gs.color
         color = f'rgb({100*r}%, {100*g}%, {100*b}%)'
         self.current_page.append(f'<path d="{d}" fill="{color}"/>')

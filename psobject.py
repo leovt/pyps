@@ -4,6 +4,15 @@ class PSObject:
         self.value = value
         self.literal = literal
 
+    def __hash__(self):
+        try:
+            return hash(self.value)
+        except TypeError:
+            return id(self)
+
+    def __eq__(self, other):
+        return self.value == other.value
+
     def __repr__(self):
         return f'{self.__class__.__name__}({self.type!r}, {self.value!r}, {self.literal!r})'
 

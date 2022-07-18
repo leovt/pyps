@@ -7,6 +7,8 @@ import op_array
 import op_font
 import op_graphics
 
+import gpath
+
 from svgdevice import SVGDevice
 from psobject import PSObject
 
@@ -198,6 +200,9 @@ class DictStack:
         assert len(self.stack) > 3, 'can not pop bottom 3 dicts'
         return self.stack.pop()
 
+    def top(self):
+        return self.stack[-1]
+
     def __getitem__(self, key):
         for d in reversed(self.stack):
             try:
@@ -217,7 +222,7 @@ class DictStack:
 
 class GraphicsState:
     def __init__(self):
-        self.current_path = []
+        self.current_path = gpath.Path()
         self.color_space = 'DeviceRGB'
         self.color = (0,0,0)
         self.line_width = 1.0
@@ -233,12 +238,12 @@ class GraphicsState:
         return (d*(tx-x) + c*(y-ty))/det, (a*(ty-y) + b*(x-tx))/det
 
     def newpath(self):
-        self.current_path = []
+        self.current_path = gpath.Path()
         self.current_point = None
 
     def moveto(self, x, y):
         print('moveto', x, y, self.CTM, self.transform(x,y))
-        self.current_path.append([('M', self.transform(x,y))])
+        self.current_path.moveto(*self.transform(x,y))
         self.current_point = (x,y)
         #print(self.current_path)
 
@@ -247,13 +252,13 @@ class GraphicsState:
         (u,v) = self.itransform(*self.current_point)
         x += u
         y += v
-        self.current_path.append([('M', self.transform(x,y))])
+        self.current_path.moveto(*self.transform(x,y))
         self.current_point = (x,y)
         #print(self.current_path)
 
     def lineto(self, x, y):
         print('lineto', x, y, self.CTM, self.transform(x,y))
-        self.current_path.append([('L', self.transform(x,y))])
+        self.current_path.lineto(*self.transform(x,y))
         self.current_point = (x,y)
         #print(self.current_path)
 
@@ -262,13 +267,13 @@ class GraphicsState:
         (u,v) = self.current_point
         x += u
         y += v
-        self.current_path.append([('L', self.transform(x,y))])
+        self.current_path.lineto(*self.transform(x,y))
         self.current_point = (x,y)
         #print(self.current_path)
 
     def closepath(self):
         print('closepath', self.CTM)
-        self.current_path.append([('Z',)])
+        self.current_path.close()
         #print(self.current_path)
 
 class Interpreter:
