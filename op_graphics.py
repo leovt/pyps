@@ -40,11 +40,11 @@ def op_closepath(ip):
 
 def op_stroke(ip):
     ip.page_device.stroke(ip.graphics_state)
-    ip.graphics_state.current_path = []
+    ip.graphics_state.newpath()
 
 def op_fill(ip):
     ip.page_device.fill(ip.graphics_state)
-    ip.graphics_state.current_path = []
+    ip.graphics_state.newpath()
 
 def op_showpage(ip):
     ip.page_device.showpage(ip.graphics_state)

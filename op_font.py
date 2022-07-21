@@ -44,12 +44,13 @@ def op_definefont(ip):
     FontMatrix = font.value.get('FontMatrix', ip.null).value
     FontName = font.value.get('FontName', ip.null).value
     print(f'definefont {FontType=} {FontName=}')
+    codepoints = [ord('a'), ord('b')]
     metrics = []
     glyphs = []
 
     originaldevice = ip.page_device
     ip.gsave()
-    ip.graphics_state.CTM = [x.value for x in FontMatrix]
+    ip.graphics_state.CTM = [1, 0, 0, 1, 0, 0]
 
     def op_setcachedevice(ip):
         ury = ip.op_stack.pop().value
@@ -74,10 +75,17 @@ def op_definefont(ip):
         fontobj.ttx = makefont.Font()
         fontobj.ttx.family_name = f'FID{fid}'
         fontobj.ttx.font_matrix = ' '.join(str(x.value) for x in font.value['FontMatrix'].value)
+
+        filename_base = f'fonts/FID{fid}'
+        filename_ttx = filename_base + '.ttx'
+        filename_woff = filename_base + '.woff'
+        font.value['*filename*'] = filename_woff
+        font.value['*family*'] = f'FID{fid}'
+
         ip.fonts[key] = font
         ip.op_stack.append(font)
 
-        for i, (glyph, mtx) in enumerate(zip(glyphs,metrics)):
+        for i, glyph, mtx in zip(codepoints,glyphs,metrics):
             glname = makefont.glyphname.get(i, f'glyph{i:04x}')
             cs = f'{mtx[0]} {" ".join(glyph.current_page)} endchar'
             fontobj.ttx.glyphs.append(makefont.Glyph(name=glname, code_point=i, width=mtx[0], lsb=mtx[2], charstring=cs))
@@ -85,14 +93,19 @@ def op_definefont(ip):
 
         em = 4 * fontobj.ttx.avg_char_width() # rule of thumb for latin
 
-        with open(f'fonts/FID{fid}.ttx', 'w') as f:
+        with open(filename_ttx, 'w') as f:
             fontobj.ttx.write_ttx(f)
+        from fontTools import ttLib
+        tt = ttLib.TTFont(flavor='woff')
+        tt.importXML(filename_ttx)
+        tt.save(filename_woff)
+
 
 
     proc = font.value['BuildChar']
 
     ip.dict_stack.push({'setcachedevice': PSObject('operatortype', op_setcachedevice, False)})
-    for_exec = (x for i in range(65) for x in (
+    for_exec = (x for i in codepoints for x in (
                                 font, PSObject('integertype', i, True), proc, PSObject('operatortype', op_exec, False)))
     ip.ex_stack.append(iter([PSObject('operatortype', op_endfont, False)]))
     ip.ex_stack.append(iter(for_exec))

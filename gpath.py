@@ -40,7 +40,7 @@ class Path:
         def transform(el):
             nonlocal x0, y0
             if el[0] == 'Z':
-                pass
+                return ''
             if el[0] == 'M':
                 x, y = el[1], el[2]
                 r = f'{x-x0} {y-y0} rmoveto'
@@ -51,6 +51,7 @@ class Path:
                 r = f'{x-x0} {y-y0} rlineto'
                 x0, y0 = x, y
                 return r
+            assert False, el
         return '\n'.join(map(transform, self.elements))
 
     def transform(self, a, b, c, d, e, f):

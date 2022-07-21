@@ -22,7 +22,8 @@ class SVGDevice:
     def __init__(self):
         self.pages = []
         self.current_page = []
-        self.options = {'imagemask_as_png': False}
+        self.options = {'imagemask_as_png': False, 'draw_glyphs': False}
+        self.used_fonts = {}
 
     def showpage(self, gs):
         self.pages.append(self.current_page)
@@ -43,12 +44,17 @@ class SVGDevice:
         self.current_page.append(f'<path d="{d}" fill="{color}"/>')
 
     def show(self, text, gs):
-        x,y = gs.transform(*gs.current_point)
-        #breakpoint()
-        s = gs.font.value.get('ScaleMatrix', 1)
-        s = 8
-        self.current_page.append(f'<text x="{x}" y="{841.9-y}" font-size="{s}">{escape(text)}</text>')
-        gs.current_point = (x+5*len(text), y)
+        if self.options['draw_glyphs']:
+            x,y = gs.transform(*gs.current_point)
+
+        else:
+            family = gs.font.value['*family*']
+            self.used_fonts[family] = gs.font.value['*filename*']
+            x,y = gs.transform(*gs.current_point)
+            #breakpoint()
+            s = gs.font.value.get('ScaleMatrix', 1)
+            self.current_page.append(f'<text x="{x}" y="{841.9-y}" font-size="{s}" font-family="{family}">{escape(text)}</text>')
+            gs.current_point = (x+5*len(text), y)
 
     def imagemask(self, size, imagedata, pivot, matrix, gs):
         orig = imagedata
@@ -90,7 +96,11 @@ class SVGDevice:
                         ' viewBox="0 0 595.3 841.9"'
                         #' transform="translate(0, 841.9) scale(1, -1)"'
                         '>\n')
-
+                if self.used_fonts:
+                    f.write('  <style>\n')
+                    for family, filename in self.used_fonts.items():
+                        f.write(f'    @font-face{{font-family: "{family}"; src: url("{filename}")}};\n')
+                    f.write('  </style>\n')
                 for element in page:
                     f.write(f'  {element}\n')
                 f.write('</svg>\n')
