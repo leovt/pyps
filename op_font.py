@@ -44,7 +44,11 @@ def op_definefont(ip):
     FontMatrix = font.value.get('FontMatrix', ip.null).value
     FontName = font.value.get('FontName', ip.null).value
     print(f'definefont {FontType=} {FontName=}')
-    codepoints = [ord('a'), ord('b')]
+
+    encoding = [x.value for x in font.value['Encoding'].value]
+    glyph_encoding = [(cp, name) for (cp, name) in enumerate(encoding) if name != '.notdef']
+    if '.notdef' in encoding:
+        glyph_encoding.insert(0, (None, '.notdef'))
     metrics = []
     glyphs = []
 
@@ -85,11 +89,10 @@ def op_definefont(ip):
         ip.fonts[key] = font
         ip.op_stack.append(font)
 
-        for i, glyph, mtx in zip(codepoints,glyphs,metrics):
-            glname = makefont.glyphname.get(i, f'glyph{i:04x}')
+        for (cp, name), glyph, mtx in zip(glyph_encoding, glyphs, metrics):
             cs = f'{mtx[0]} {" ".join(glyph.current_page)} endchar'
-            fontobj.ttx.glyphs.append(makefont.Glyph(name=glname, code_point=i, width=mtx[0], lsb=mtx[2], charstring=cs))
-            print(glname)
+            fontobj.ttx.add_glyph(makefont.Glyph(name=name, code_point=cp, width=mtx[0], lsb=mtx[2], charstring=cs))
+            print(cp, name)
 
         em = 4 * fontobj.ttx.avg_char_width() # rule of thumb for latin
 
@@ -100,13 +103,18 @@ def op_definefont(ip):
         tt.importXML(filename_ttx)
         tt.save(filename_woff)
 
-
-
-    proc = font.value['BuildChar']
-
     ip.dict_stack.push({'setcachedevice': PSObject('operatortype', op_setcachedevice, False)})
-    for_exec = (x for i in codepoints for x in (
-                                font, PSObject('integertype', i, True), proc, PSObject('operatortype', op_exec, False)))
+
+    breakpoint()
+
+    if 'BuildGlyph' in font.value:
+        proc = font.value['BuildGlyph']
+        for_exec = (x for cp, name in glyph_encoding for x in (
+                                    font, PSObject('nametype', name, True), proc, PSObject('operatortype', op_exec, False)))
+    else:
+        proc = font.value['BuildChar']
+        for_exec = (x for cp, name in glyph_encoding for x in (
+                                    font, PSObject('integertype', cp, True), proc, PSObject('operatortype', op_exec, False)))
     ip.ex_stack.append(iter([PSObject('operatortype', op_endfont, False)]))
     ip.ex_stack.append(iter(for_exec))
 

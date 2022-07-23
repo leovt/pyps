@@ -59,9 +59,17 @@ class Font:
     template_path = 'template.ttx'
 
     def __init__(self):
-        notdef = Glyph(name='.notdef', code_point=None, width=500, lsb=50,
-            charstring='500 450 hmoveto 750 -400 -750 vlineto 50 50 rmoveto 650 300 -650 vlineto endchar')
-        self.glyphs = [notdef]
+        self.glyphs = []
+
+    def add_glyph(self, glyph):
+        if self.glyphs and glyph.name == '.notdef':
+            assert False, '.notdef must be the first glyph in the font.'
+
+        if not self.glyphs and glyph.name != '.notdef':
+            # add a .notdef glyph if none is defined already
+            notdef = Glyph(name='.notdef', code_point=None, width=500, lsb=50, charstring='500 450 hmoveto 750 -400 -750 vlineto 50 50 rmoveto 650 300 -650 vlineto endchar')
+            self.glyphs = [notdef]
+        self.glyphs.append(glyph)
 
     def template(self):
         with open(self.template_path) as f:
